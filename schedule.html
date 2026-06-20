@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スケジュール — My Super Secretary</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --sage: #7a9e7e; --sage-light: #a8c5ac; --sage-dark: #4f7a54;
+      --cream: #faf7f2; --warm: #f5efe6;
+      --text: #2d2d2d; --muted: #6b6b6b; --accent: #d4956a;
+      --white: #ffffff;
+    }
+    body { font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+    nav { position: fixed; top: 0; width: 100%; background: rgba(250,247,242,0.96); backdrop-filter: blur(14px); padding: 12px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 100; border-bottom: 1px solid rgba(122,158,126,0.18); }
+    .logo { font-size: 1rem; font-weight: 800; color: var(--sage-dark); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    .nav-links { display: flex; list-style: none; gap: 4px; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.82rem; padding: 6px 14px; border-radius: 20px; transition: all 0.2s; font-weight: 500; }
+    .nav-links a:hover { background: var(--warm); color: var(--sage-dark); }
+    .nav-links a.active { background: var(--sage-dark); color: white; }
+
+    .page { padding: 88px 32px 60px; max-width: 1100px; margin: 0 auto; }
+
+    /* Week header */
+    .week-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .week-title { font-size: 1.3rem; font-weight: 900; }
+    .week-nav { display: flex; gap: 8px; align-items: center; }
+    .week-nav button { background: var(--white); border: 1.5px solid #e8e2da; border-radius: 10px; padding: 7px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; color: var(--text); transition: all 0.2s; font-family: inherit; }
+    .week-nav button:hover { background: var(--sage-dark); color: white; border-color: var(--sage-dark); }
+    .week-nav .today-btn { background: var(--warm); border-color: transparent; }
+
+    .add-btn { background: var(--sage-dark); color: white; border: none; border-radius: 24px; padding: 9px 22px; font-size: 0.88rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .add-btn:hover { background: var(--sage); }
+
+    /* Week grid */
+    .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+
+    .day-col { background: var(--white); border-radius: 16px; padding: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); min-height: 120px; }
+    .day-col.today { border: 2px solid var(--sage-dark); }
+    .day-header { margin-bottom: 10px; }
+    .day-name { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .day-num { font-size: 1.3rem; font-weight: 900; line-height: 1.2; }
+    .day-col.today .day-num { color: var(--sage-dark); }
+    .day-col.past .day-name,
+    .day-col.past .day-num { opacity: 0.4; }
+
+    .day-add { width: 100%; background: var(--warm); border: none; border-radius: 8px; padding: 5px; font-size: 0.8rem; color: var(--muted); cursor: pointer; margin-top: 8px; transition: all 0.2s; font-family: inherit; }
+    .day-add:hover { background: var(--sage-light); color: var(--sage-dark); }
+
+    /* Entry block */
+    .entry-block { border-radius: 8px; padding: 7px 9px; margin-bottom: 6px; position: relative; cursor: default; }
+    .entry-time { font-size: 0.65rem; font-weight: 700; opacity: 0.75; }
+    .entry-title { font-size: 0.78rem; font-weight: 700; margin-top: 1px; line-height: 1.3; }
+    .entry-delete { position: absolute; top: 4px; right: 4px; background: none; border: none; cursor: pointer; font-size: 0.7rem; opacity: 0; color: rgba(0,0,0,0.4); transition: opacity 0.15s; padding: 2px; }
+    .entry-block:hover .entry-delete { opacity: 1; }
+
+    /* Modal */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; align-items: center; justify-content: center; }
+    .overlay.open { display: flex; }
+    .modal { background: var(--white); border-radius: 22px; padding: 32px; width: 440px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.18); }
+    .modal h2 { font-size: 1.1rem; font-weight: 800; margin-bottom: 22px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 5px; color: var(--text); }
+    .form-group input,
+    .form-group select,
+    .form-group textarea { width: 100%; padding: 9px 12px; border: 1.5px solid #e8e2da; border-radius: 10px; font-size: 0.87rem; font-family: inherit; background: var(--cream); color: var(--text); outline: none; transition: border-color 0.2s; }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--sage); }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 22px; }
+    .btn-primary { flex: 1; background: var(--sage-dark); color: white; border: none; border-radius: 24px; padding: 11px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .btn-primary:hover { background: var(--sage); }
+    .btn-cancel { background: var(--warm); color: var(--muted); border: none; border-radius: 24px; padding: 11px 20px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .btn-cancel:hover { background: #e8e2da; }
+
+    .empty-day { font-size: 0.72rem; color: #ccc; text-align: center; padding: 12px 0; }
+
+    @media (max-width: 900px) {
+      .week-grid { grid-template-columns: repeat(4, 1fr); }
+      .page { padding: 80px 16px 40px; }
+      nav { padding: 12px 16px; }
+    }
+    @media (max-width: 600px) {
+      .week-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">My<span>Super</span>Secretary</a>
+  <ul class="nav-links">
+    <li><a href="index.html">ホーム</a></li>
+    <li><a href="schedule.html" class="active">スケジュール</a></li>
+    <li><a href="tasks.html">タスク</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div class="week-header">
+    <div class="week-title" id="weekTitle"></div>
+    <div class="week-nav">
+      <button onclick="changeWeek(-1)">← 前の週</button>
+      <button class="today-btn" onclick="goToday()">今週</button>
+      <button onclick="changeWeek(1)">次の週 →</button>
+      <button class="add-btn" onclick="openModal()">＋ 追加</button>
+    </div>
+  </div>
+  <div class="week-grid" id="weekGrid"></div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="closeOnBg(event)">
+  <div class="modal">
+    <h2>スケジュールを追加</h2>
+    <div class="form-group">
+      <label>日付</label>
+      <input type="date" id="fDate">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>開始時間</label>
+        <input type="time" id="fStart" value="09:00">
+      </div>
+      <div class="form-group">
+        <label>終了時間</label>
+        <input type="time" id="fEnd" value="10:00">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>ロール</label>
+      <select id="fRole">
+        <option value="yoga">🧘 ヨガ講師</option>
+        <option value="univ">📚 大学生</option>
+        <option value="ikigai">✦ IKIGAIプロジェクト</option>
+        <option value="gakudo">🏫 学童事業</option>
+        <option value="trip">✈️ 出張・研修</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>タイトル</label>
+      <input type="text" id="fTitle" placeholder="例：ヨガレッスン（A施設）">
+    </div>
+    <div class="form-group">
+      <label>メモ（任意）</label>
+      <textarea id="fNotes" placeholder="備考など"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+      <button class="btn-primary" onclick="saveEntry()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ROLES = [
+  { id: 'yoga',   name: 'ヨガ講師',          icon: '🧘', color: '#4f7a54', bg: 'rgba(168,197,172,0.25)' },
+  { id: 'univ',   name: '大学生',             icon: '📚', color: '#c47a3e', bg: 'rgba(212,149,106,0.2)'  },
+  { id: 'ikigai', name: 'IKIGAIプロジェクト', icon: '✦',  color: '#7a5a8a', bg: 'rgba(184,153,202,0.2)'  },
+  { id: 'gakudo', name: '学童事業',            icon: '🏫', color: '#2e6e8a', bg: 'rgba(100,160,200,0.2)'  },
+  { id: 'trip',   name: '出張・研修',          icon: '✈️', color: '#6b5230', bg: 'rgba(180,170,140,0.22)' },
+];
+const getSchedule = () => JSON.parse(localStorage.getItem('msa_schedule') || '[]');
+const saveSchedule = d => localStorage.setItem('msa_schedule', JSON.stringify(d));
+const uid = () => Math.random().toString(36).slice(2,10);
+
+const DAYS_JP = ['日','月','火','水','木','金','土'];
+const today = new Date();
+const todayStr = today.toISOString().slice(0,10);
+
+let weekOffset = 0;
+
+function getWeekStart(offset) {
+  const d = new Date(today);
+  const day = d.getDay();
+  const diff = d.getDate() - day + 1; // Monday
+  d.setDate(diff + offset * 7);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function fmt(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function renderWeek() {
+  const start = getWeekStart(weekOffset);
+  const end = new Date(start); end.setDate(end.getDate()+6);
+  const mo = start.getMonth()+1, mo2 = end.getMonth()+1;
+  document.getElementById('weekTitle').textContent =
+    mo === mo2
+      ? `${start.getFullYear()}年${mo}月`
+      : `${start.getFullYear()}年${mo}月 – ${mo2}月`;
+
+  const schedule = getSchedule();
+  const grid = document.getElementById('weekGrid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start); d.setDate(d.getDate() + i);
+    const dStr = fmt(d);
+    const isToday = dStr === todayStr;
+    const isPast  = dStr < todayStr;
+    const dayEntries = schedule.filter(s => s.date === dStr).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+
+    const col = document.createElement('div');
+    col.className = `day-col${isToday?' today':''}${isPast?' past':''}`;
+    col.innerHTML = `
+      <div class="day-header">
+        <div class="day-name">${DAYS_JP[d.getDay()]}曜</div>
+        <div class="day-num">${d.getDate()}</div>
+      </div>
+      ${dayEntries.length ? dayEntries.map(e => {
+        const r = ROLES.find(r=>r.id===e.role)||{color:'#999',bg:'#f0f0f0',icon:'',name:e.role};
+        return `<div class="entry-block" style="background:${r.bg};color:${r.color}">
+          <button class="entry-delete" onclick="deleteEntry('${e.id}')" title="削除">✕</button>
+          <div class="entry-time">${e.startTime}–${e.endTime}</div>
+          <div class="entry-title">${e.title}</div>
+        </div>`;
+      }).join('') : '<div class="empty-day">–</div>'}
+      <button class="day-add" onclick="openModal('${dStr}')">＋</button>
+    `;
+    grid.appendChild(col);
+  }
+}
+
+function changeWeek(dir) { weekOffset += dir; renderWeek(); }
+function goToday() { weekOffset = 0; renderWeek(); }
+
+function openModal(date) {
+  document.getElementById('fDate').value = date || todayStr;
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fNotes').value = '';
+  document.getElementById('fStart').value = '09:00';
+  document.getElementById('fEnd').value = '10:00';
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('fTitle').focus();
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+function closeOnBg(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+
+function saveEntry() {
+  const title = document.getElementById('fTitle').value.trim();
+  if (!title) { alert('タイトルを入力してください'); return; }
+  const entry = {
+    id: uid(),
+    date: document.getElementById('fDate').value,
+    startTime: document.getElementById('fStart').value,
+    endTime: document.getElementById('fEnd').value,
+    role: document.getElementById('fRole').value,
+    title,
+    notes: document.getElementById('fNotes').value.trim(),
+  };
+  const data = getSchedule();
+  data.push(entry);
+  saveSchedule(data);
+  closeModal();
+  renderWeek();
+}
+
+function deleteEntry(id) {
+  if (!confirm('このエントリを削除しますか？')) return;
+  saveSchedule(getSchedule().filter(e => e.id !== id));
+  renderWeek();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+renderWeek();
+</script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>タスク — My Super Secretary</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --sage: #7a9e7e; --sage-light: #a8c5ac; --sage-dark: #4f7a54;
+      --cream: #faf7f2; --warm: #f5efe6;
+      --text: #2d2d2d; --muted: #6b6b6b; --accent: #d4956a;
+      --white: #ffffff; --red: #e05555;
+    }
+    body { font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+    nav { position: fixed; top: 0; width: 100%; background: rgba(250,247,242,0.96); backdrop-filter: blur(14px); padding: 12px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 100; border-bottom: 1px solid rgba(122,158,126,0.18); }
+    .logo { font-size: 1rem; font-weight: 800; color: var(--sage-dark); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    .nav-links { display: flex; list-style: none; gap: 4px; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.82rem; padding: 6px 14px; border-radius: 20px; transition: all 0.2s; font-weight: 500; }
+    .nav-links a:hover { background: var(--warm); color: var(--sage-dark); }
+    .nav-links a.active { background: var(--sage-dark); color: white; }
+
+    .page { padding: 88px 32px 60px; max-width: 860px; margin: 0 auto; }
+
+    /* Role tabs */
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
+    .tab { background: var(--white); border: 1.5px solid #e8e2da; border-radius: 22px; padding: 7px 16px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; color: var(--muted); font-family: inherit; }
+    .tab:hover { border-color: var(--sage); color: var(--sage-dark); }
+    .tab.active { border-color: transparent; color: white; }
+
+    /* Add form */
+    .add-form { background: var(--white); border-radius: 18px; padding: 22px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .add-form-title { font-size: 0.71rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: end; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.74rem; font-weight: 700; color: var(--muted); }
+    .form-group input,
+    .form-group select { padding: 9px 12px; border: 1.5px solid #e8e2da; border-radius: 10px; font-size: 0.86rem; font-family: inherit; background: var(--cream); color: var(--text); outline: none; transition: border-color 0.2s; }
+    .form-group input:focus,
+    .form-group select:focus { border-color: var(--sage); }
+    .form-group input.title-input { min-width: 200px; }
+    .submit-btn { background: var(--sage-dark); color: white; border: none; border-radius: 10px; padding: 9px 20px; font-size: 0.86rem; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; transition: all 0.2s; height: 40px; }
+    .submit-btn:hover { background: var(--sage); }
+
+    /* Task list */
+    .section-label { font-size: 0.71rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .count-badge { background: var(--warm); color: var(--muted); font-size: 0.68rem; padding: 2px 8px; border-radius: 10px; letter-spacing: 0; text-transform: none; }
+
+    .task-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
+
+    .task-card { background: var(--white); border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 10px rgba(0,0,0,0.05); display: flex; align-items: flex-start; gap: 12px; transition: box-shadow 0.2s; }
+    .task-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.09); }
+    .task-card.done-card { opacity: 0.5; }
+
+    .task-cb { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--sage-dark); flex-shrink: 0; cursor: pointer; }
+
+    .task-body { flex: 1; min-width: 0; }
+    .task-name { font-size: 0.9rem; font-weight: 600; line-height: 1.4; }
+    .task-name.done { text-decoration: line-through; }
+    .task-meta { display: flex; gap: 8px; margin-top: 5px; align-items: center; flex-wrap: wrap; }
+
+    .role-chip { font-size: 0.68rem; padding: 2px 8px; border-radius: 8px; font-weight: 700; }
+    .prio-chip { font-size: 0.68rem; padding: 2px 8px; border-radius: 8px; font-weight: 700; }
+    .prio-high { background: #fde8e8; color: #c0392b; }
+    .prio-mid  { background: #fef3e0; color: #c47a3e; }
+    .prio-low  { background: #eaf3ea; color: #4f7a54; }
+
+    .task-due { font-size: 0.72rem; color: var(--muted); }
+    .task-due.overdue { color: var(--red); font-weight: 700; }
+
+    .task-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+    .task-card:hover .task-actions { opacity: 1; }
+    .action-btn { background: var(--warm); border: none; border-radius: 7px; padding: 5px 9px; font-size: 0.72rem; cursor: pointer; color: var(--muted); font-family: inherit; transition: all 0.15s; }
+    .action-btn:hover { background: #e8e2da; color: var(--text); }
+    .action-btn.del:hover { background: #fde8e8; color: var(--red); }
+
+    /* Completed toggle */
+    .completed-toggle { background: none; border: none; cursor: pointer; font-size: 0.78rem; color: var(--sage-dark); font-weight: 700; font-family: inherit; padding: 0; }
+
+    .empty-state { background: var(--white); border-radius: 14px; padding: 32px; text-align: center; color: var(--muted); font-size: 0.85rem; line-height: 1.8; box-shadow: 0 1px 10px rgba(0,0,0,0.04); }
+
+    @media (max-width: 700px) {
+      .form-row { grid-template-columns: 1fr 1fr; }
+      .submit-btn { grid-column: span 2; }
+      .page { padding: 80px 16px 40px; }
+      nav { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">My<span>Super</span>Secretary</a>
+  <ul class="nav-links">
+    <li><a href="index.html">ホーム</a></li>
+    <li><a href="schedule.html">スケジュール</a></li>
+    <li><a href="tasks.html" class="active">タスク</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+  <!-- Role tabs -->
+  <div class="tabs" id="tabs"></div>
+
+  <!-- Add form -->
+  <div class="add-form">
+    <div class="add-form-title">＋ タスクを追加</div>
+    <div class="form-row">
+      <div class="form-group" style="grid-column: 1/-1">
+        <label>タイトル</label>
+        <input type="text" id="fTitle" class="title-input" placeholder="タスク名を入力" onkeydown="if(event.key==='Enter')addTask()">
+      </div>
+      <div class="form-group">
+        <label>ロール</label>
+        <select id="fRole">
+          <option value="yoga">🧘 ヨガ講師</option>
+          <option value="univ">📚 大学生</option>
+          <option value="ikigai">✦ IKIGAI</option>
+          <option value="gakudo">🏫 学童事業</option>
+          <option value="trip">✈️ 出張・研修</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>期限</label>
+        <input type="date" id="fDue">
+      </div>
+      <div class="form-group">
+        <label>優先度</label>
+        <select id="fPrio">
+          <option value="high">🔴 高</option>
+          <option value="medium" selected>🟡 中</option>
+          <option value="low">🟢 低</option>
+        </select>
+      </div>
+      <button class="submit-btn" onclick="addTask()">追加</button>
+    </div>
+  </div>
+
+  <!-- Task list -->
+  <div id="taskArea"></div>
+</div>
+
+<script>
+const ROLES = [
+  { id: 'yoga',   name: 'ヨガ講師',          icon: '🧘', color: '#4f7a54', bg: 'rgba(168,197,172,0.25)' },
+  { id: 'univ',   name: '大学生',             icon: '📚', color: '#c47a3e', bg: 'rgba(212,149,106,0.2)'  },
+  { id: 'ikigai', name: 'IKIGAIプロジェクト', icon: '✦',  color: '#7a5a8a', bg: 'rgba(184,153,202,0.2)'  },
+  { id: 'gakudo', name: '学童事業',            icon: '🏫', color: '#2e6e8a', bg: 'rgba(100,160,200,0.2)'  },
+  { id: 'trip',   name: '出張・研修',          icon: '✈️', color: '#6b5230', bg: 'rgba(180,170,140,0.22)' },
+];
+const getTasks  = () => JSON.parse(localStorage.getItem('msa_tasks') || '[]');
+const saveTasks = d  => localStorage.setItem('msa_tasks', JSON.stringify(d));
+const uid = () => Math.random().toString(36).slice(2,10);
+
+const params = new URLSearchParams(location.search);
+let activeRole = params.get('role') || 'all';
+let showDone = false;
+
+const today = new Date().toISOString().slice(0,10);
+
+// Set default due date to today
+document.getElementById('fDue').value = today;
+
+// Render tabs
+function renderTabs() {
+  const tasks = getTasks();
+  const el = document.getElementById('tabs');
+  const allCount = tasks.filter(t=>!t.completed).length;
+  const tabs = [{ id: 'all', name: 'すべて', icon: '📋', color: '#4f7a54', bg: '#4f7a54' }, ...ROLES];
+  el.innerHTML = tabs.map(r => {
+    const cnt = r.id === 'all'
+      ? allCount
+      : tasks.filter(t=>t.role===r.id&&!t.completed).length;
+    const isActive = activeRole === r.id;
+    return `<button class="tab${isActive?' active':''}"
+      style="${isActive ? `background:${r.color||r.bg};border-color:transparent` : ''}"
+      onclick="setRole('${r.id}')">
+      ${r.icon} ${r.name} ${cnt>0?`<span style="opacity:0.7">${cnt}</span>`:''}
+    </button>`;
+  }).join('');
+}
+
+function setRole(id) {
+  activeRole = id;
+  // Update URL without reload
+  history.replaceState(null,'', id==='all' ? 'tasks.html' : `tasks.html?role=${id}`);
+  renderTabs();
+  renderTasks();
+  // Sync select
+  if (id !== 'all') document.getElementById('fRole').value = id;
+}
+
+// Render tasks
+function renderTasks() {
+  const tasks = getTasks();
+  let filtered = activeRole === 'all' ? tasks : tasks.filter(t=>t.role===activeRole);
+
+  const pending   = filtered.filter(t=>!t.completed).sort((a,b)=>{
+    const prioOrder = {high:0,medium:1,low:2};
+    if (a.dueDate !== b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+    return (prioOrder[a.priority]||1) - (prioOrder[b.priority]||1);
+  });
+  const completed = filtered.filter(t=>t.completed).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+
+  const area = document.getElementById('taskArea');
+  let html = '';
+
+  // Pending tasks
+  html += `<div class="section-label">
+    未完了 <span class="count-badge">${pending.length}件</span>
+  </div>`;
+
+  if (pending.length) {
+    html += `<div class="task-list">${pending.map(t=>taskCard(t)).join('')}</div>`;
+  } else {
+    html += `<div class="empty-state" style="margin-bottom:24px">タスクがありません。上のフォームから追加してください。</div>`;
+  }
+
+  // Completed tasks
+  if (completed.length) {
+    html += `<div class="section-label">
+      完了済み <span class="count-badge">${completed.length}件</span>
+      <button class="completed-toggle" onclick="toggleDone()">${showDone?'▲ 非表示':'▼ 表示'}</button>
+    </div>`;
+    if (showDone) {
+      html += `<div class="task-list">${completed.map(t=>taskCard(t)).join('')}</div>`;
+    }
+  }
+
+  area.innerHTML = html;
+}
+
+function taskCard(t) {
+  const r = ROLES.find(r=>r.id===t.role)||{name:t.role,color:'#999',bg:'#eee',icon:''};
+  const prioMap = {high:['高','prio-high'],medium:['中','prio-mid'],low:['低','prio-low']};
+  const [pl,pc] = prioMap[t.priority]||['中','prio-mid'];
+  const overdue = !t.completed && t.dueDate < today;
+  return `<div class="task-card${t.completed?' done-card':''}">
+    <input type="checkbox" class="task-cb" ${t.completed?'checked':''} onchange="toggleTask('${t.id}')">
+    <div class="task-body">
+      <div class="task-name${t.completed?' done':''}">${t.title}</div>
+      <div class="task-meta">
+        <span class="role-chip" style="background:${r.bg};color:${r.color}">${r.icon} ${r.name}</span>
+        <span class="prio-chip ${pc}">${pl}</span>
+        ${t.dueDate ? `<span class="task-due${overdue?' overdue':''}">${overdue?'⚠ ':' '}${t.dueDate}</span>` : ''}
+      </div>
+    </div>
+    <div class="task-actions">
+      <button class="action-btn del" onclick="deleteTask('${t.id}')">削除</button>
+    </div>
+  </div>`;
+}
+
+function addTask() {
+  const title = document.getElementById('fTitle').value.trim();
+  if (!title) { document.getElementById('fTitle').focus(); return; }
+  const task = {
+    id: uid(),
+    role: document.getElementById('fRole').value,
+    title,
+    dueDate: document.getElementById('fDue').value,
+    priority: document.getElementById('fPrio').value,
+    completed: false,
+    createdAt: new Date().toISOString(),
+  };
+  const tasks = getTasks();
+  tasks.push(task);
+  saveTasks(tasks);
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fTitle').focus();
+  renderTabs();
+  renderTasks();
+}
+
+function toggleTask(id) {
+  const tasks = getTasks();
+  const t = tasks.find(x=>x.id===id);
+  if (t) { t.completed = !t.completed; saveTasks(tasks); renderTabs(); renderTasks(); }
+}
+
+function deleteTask(id) {
+  if (!confirm('このタスクを削除しますか？')) return;
+  saveTasks(getTasks().filter(t=>t.id!==id));
+  renderTabs();
+  renderTasks();
+}
+
+function toggleDone() { showDone = !showDone; renderTasks(); }
+
+renderTabs();
+renderTasks();
+</script>
+</body>
+</html>
