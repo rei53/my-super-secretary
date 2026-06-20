@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>料金 — MySecretaryAI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --sage: #7a9e7e; --sage-light: #a8c5ac; --sage-dark: #4f7a54;
+      --cream: #faf7f2; --warm: #f5efe6; --brown: #8b6f5e;
+      --text: #2d2d2d; --muted: #6b6b6b; --accent: #d4956a;
+      --accent-light: #f0d5c0; --white: #ffffff;
+    }
+    body { font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; }
+
+    nav {
+      position: fixed; top: 0; width: 100%;
+      background: rgba(250,247,242,0.93); backdrop-filter: blur(14px);
+      padding: 14px 40px; display: flex; justify-content: space-between; align-items: center;
+      z-index: 100; border-bottom: 1px solid rgba(122,158,126,0.15);
+    }
+    .logo { font-size: 1.1rem; font-weight: 800; color: var(--sage-dark); letter-spacing: 0.04em; text-decoration: none; }
+    .logo span { color: var(--accent); }
+    nav ul { display: flex; list-style: none; gap: 28px; }
+    nav ul a { text-decoration: none; color: var(--muted); font-size: 0.85rem; transition: color 0.2s; }
+    nav ul a:hover, nav ul a.active { color: var(--sage-dark); font-weight: 700; }
+    .nav-cta { background: var(--sage-dark); color: var(--white) !important; padding: 7px 18px; border-radius: 22px; font-weight: 700 !important; }
+
+    .page-hero { padding: 140px 40px 80px; background: linear-gradient(135deg, var(--warm) 0%, var(--cream) 100%); text-align: center; }
+    .page-tag { display: inline-block; font-size: 0.73rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+    .page-hero h1 { font-size: 2.6rem; font-weight: 900; margin-bottom: 18px; }
+    .page-hero h1 em { font-style: normal; color: var(--sage-dark); }
+    .page-hero p { color: var(--muted); font-size: 1rem; max-width: 500px; margin: 0 auto; }
+
+    section { padding: 80px 40px; }
+    .inner { max-width: 1000px; margin: 0 auto; }
+
+    /* Toggle */
+    .billing-toggle { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 32px; }
+    .toggle-label { font-size: 0.88rem; font-weight: 600; color: var(--muted); }
+    .toggle-label.active { color: var(--sage-dark); }
+    .badge { background: var(--accent-light); color: var(--brown); font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 10px; margin-left: 4px; }
+    .switch { width: 44px; height: 24px; background: var(--sage-dark); border-radius: 12px; position: relative; cursor: pointer; }
+    .switch::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; }
+
+    /* Plans */
+    .plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 48px; }
+
+    .plan-card {
+      background: var(--white); border-radius: 24px; padding: 32px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      position: relative; transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .plan-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+    .plan-card.popular {
+      background: linear-gradient(135deg, var(--sage-dark) 0%, #3d6644 100%);
+      color: var(--white); box-shadow: 0 12px 48px rgba(79,122,84,0.35);
+    }
+
+    .popular-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: white; font-size: 0.7rem; font-weight: 700;
+      padding: 4px 16px; border-radius: 12px; white-space: nowrap;
+    }
+
+    .plan-name { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; opacity: 0.7; }
+    .plan-price { font-size: 2.8rem; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+    .plan-price span { font-size: 1rem; font-weight: 600; }
+    .plan-period { font-size: 0.78rem; opacity: 0.6; margin-bottom: 20px; }
+    .plan-desc { font-size: 0.83rem; opacity: 0.75; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .plan-card.popular .plan-desc { border-color: rgba(255,255,255,0.15); }
+
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .feature-list li { font-size: 0.83rem; display: flex; align-items: flex-start; gap: 8px; }
+    .feature-list li::before { content: '✓'; font-weight: 900; color: var(--sage-dark); flex-shrink: 0; }
+    .plan-card.popular .feature-list li::before { color: var(--sage-light); }
+    .feature-list li.off { opacity: 0.4; }
+    .feature-list li.off::before { content: '–'; }
+
+    .plan-btn {
+      display: block; text-align: center; padding: 12px;
+      border-radius: 30px; font-weight: 700; font-size: 0.9rem;
+      text-decoration: none; transition: all 0.25s;
+    }
+    .plan-btn.outline { border: 2px solid var(--sage-dark); color: var(--sage-dark); }
+    .plan-btn.outline:hover { background: var(--sage-dark); color: white; }
+    .plan-btn.filled { background: white; color: var(--sage-dark); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .plan-btn.filled:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.2); transform: translateY(-1px); }
+
+    /* FAQ */
+    .faq-section { background: var(--warm); }
+    .section-tag { display: inline-block; font-size: 0.73rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    .section-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 14px; }
+    .section-desc { color: var(--muted); font-size: 0.95rem; margin-bottom: 40px; }
+
+    .faq-list { display: flex; flex-direction: column; gap: 14px; }
+    .faq-item { background: var(--white); border-radius: 16px; padding: 22px 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+    .faq-q { font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; color: var(--sage-dark); }
+    .faq-a { font-size: 0.83rem; color: var(--muted); }
+
+    /* CTA */
+    .cta-section { background: linear-gradient(135deg, var(--sage-dark) 0%, #3d6644 100%); color: var(--white); text-align: center; padding: 96px 40px; }
+    .cta-section h2 { font-size: 2rem; font-weight: 900; margin-bottom: 14px; }
+    .cta-desc { color: rgba(255,255,255,0.75); font-size: 1rem; max-width: 440px; margin: 0 auto 32px; }
+    .btn-light { background: var(--white); color: var(--sage-dark); padding: 13px 34px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 0.93rem; transition: all 0.25s; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    .btn-light:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.22); }
+
+    footer { background: var(--text); color: rgba(255,255,255,0.45); text-align: center; padding: 28px 40px; font-size: 0.78rem; }
+    footer strong { color: rgba(255,255,255,0.8); }
+
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 900px) {
+      .plans-grid { grid-template-columns: 1fr; }
+      .page-hero h1 { font-size: 1.9rem; }
+      nav ul { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">My<span>Secretary</span>AI</a>
+  <ul>
+    <li><a href="index.html">ホーム</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="pricing.html" class="active">料金</a></li>
+    <li><a href="contact.html">お問い合わせ</a></li>
+    <li><a href="#" class="nav-cta">はじめる</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero">
+  <div class="page-tag">Pricing</div>
+  <h1>シンプルな料金、<br><em>すべての役割に対応。</em></h1>
+  <p>14日間無料トライアルつき。クレジットカード不要ではじめられます。</p>
+  <div class="billing-toggle">
+    <span class="toggle-label active">月払い</span>
+    <div class="switch"></div>
+    <span class="toggle-label">年払い <span class="badge">2ヶ月分お得</span></span>
+  </div>
+</div>
+
+<!-- PLANS -->
+<section>
+  <div class="inner">
+    <div class="plans-grid">
+
+      <div class="plan-card reveal">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">¥<span>0</span></div>
+        <div class="plan-period">ずっと無料</div>
+        <div class="plan-desc">まず試してみたい方に。基本機能で1つの役割を管理できます。</div>
+        <ul class="feature-list">
+          <li>役割 1つまで</li>
+          <li>週次スケジュール管理</li>
+          <li>タスク登録（最大20件）</li>
+          <li class="off">AI優先順位判断</li>
+          <li class="off">出張自動再スケジュール</li>
+          <li class="off">SNS・LINEリマインド</li>
+          <li class="off">週次レポート</li>
+        </ul>
+        <a href="#" class="plan-btn outline">無料ではじめる</a>
+      </div>
+
+      <div class="plan-card popular reveal">
+        <div class="popular-badge">✦ 一番人気</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">¥<span>1,980</span></div>
+        <div class="plan-period">/ 月（税込）</div>
+        <div class="plan-desc">複数の役割を持つ方に。AIが全業務を一元管理し、今日やることを教えてくれます。</div>
+        <ul class="feature-list">
+          <li>役割 無制限</li>
+          <li>週次スケジュール管理</li>
+          <li>タスク登録 無制限</li>
+          <li>AI優先順位判断</li>
+          <li>出張自動再スケジュール</li>
+          <li>SNS・LINEリマインド</li>
+          <li>週次レポート</li>
+        </ul>
+        <a href="#" class="plan-btn filled">14日間無料で試す</a>
+      </div>
+
+      <div class="plan-card reveal">
+        <div class="plan-name">Team</div>
+        <div class="plan-price">¥<span>4,980</span></div>
+        <div class="plan-period">/ 月（税込）・5名まで</div>
+        <div class="plan-desc">チームや組織で使いたい方に。メンバー全員の業務を一元把握できます。</div>
+        <ul class="feature-list">
+          <li>Proプランの全機能</li>
+          <li>5名まで共有</li>
+          <li>チームカレンダー</li>
+          <li>メンバー別タスク割当</li>
+          <li>管理者ダッシュボード</li>
+          <li>優先サポート</li>
+          <li>カスタムリマインド設定</li>
+        </ul>
+        <a href="contact.html" class="plan-btn outline">相談する</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="inner">
+    <div class="reveal">
+      <div class="section-tag">FAQ</div>
+      <h2 class="section-title">よくある質問</h2>
+      <p class="section-desc">ご不明な点はお気軽にお問い合わせください。</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <div class="faq-q">無料トライアル中にカードは必要ですか？</div>
+        <div class="faq-a">いいえ、14日間の無料トライアルはクレジットカード不要ではじめられます。トライアル終了後に継続する場合のみ登録が必要です。</div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-q">いつでもキャンセルできますか？</div>
+        <div class="faq-a">はい、いつでもキャンセル可能です。解約後もその月の終わりまでProプランの機能をご利用いただけます。</div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-q">役割は何種類まで登録できますか？</div>
+        <div class="faq-a">Proプランでは役割の数に制限はありません。ヨガ講師・大学生・副業・育児など、すべての役割を一元管理できます。</div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-q">既存のカレンダーと連携できますか？</div>
+        <div class="faq-a">Googleカレンダーとの連携機能を現在開発中です。近日中にリリース予定です。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="reveal">
+    <h2>まず、14日間<br>無料で試してみる。</h2>
+    <p class="cta-desc">クレジットカード不要。今日から秘書があなたの業務を整理します。</p>
+    <a href="#" class="btn-light">✦ 無料トライアルをはじめる</a>
+  </div>
+</section>
+
+<footer>
+  <p><strong>MySecretaryAI</strong> — 5つの顔を、ひとつにまとめる。</p>
+  <p style="margin-top:8px">© 2026 MySecretaryAI · すべての業務に、ゆとりを。</p>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 70); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

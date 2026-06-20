@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お問い合わせ — MySecretaryAI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --sage: #7a9e7e; --sage-light: #a8c5ac; --sage-dark: #4f7a54;
+      --cream: #faf7f2; --warm: #f5efe6; --brown: #8b6f5e;
+      --text: #2d2d2d; --muted: #6b6b6b; --accent: #d4956a;
+      --accent-light: #f0d5c0; --white: #ffffff;
+    }
+    body { font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; }
+
+    nav {
+      position: fixed; top: 0; width: 100%;
+      background: rgba(250,247,242,0.93); backdrop-filter: blur(14px);
+      padding: 14px 40px; display: flex; justify-content: space-between; align-items: center;
+      z-index: 100; border-bottom: 1px solid rgba(122,158,126,0.15);
+    }
+    .logo { font-size: 1.1rem; font-weight: 800; color: var(--sage-dark); letter-spacing: 0.04em; text-decoration: none; }
+    .logo span { color: var(--accent); }
+    nav ul { display: flex; list-style: none; gap: 28px; }
+    nav ul a { text-decoration: none; color: var(--muted); font-size: 0.85rem; transition: color 0.2s; }
+    nav ul a:hover, nav ul a.active { color: var(--sage-dark); font-weight: 700; }
+    .nav-cta { background: var(--sage-dark); color: var(--white) !important; padding: 7px 18px; border-radius: 22px; font-weight: 700 !important; }
+
+    .page-hero { padding: 140px 40px 80px; background: linear-gradient(135deg, var(--warm) 0%, var(--cream) 100%); text-align: center; }
+    .page-tag { display: inline-block; font-size: 0.73rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+    .page-hero h1 { font-size: 2.6rem; font-weight: 900; margin-bottom: 18px; }
+    .page-hero h1 em { font-style: normal; color: var(--sage-dark); }
+    .page-hero p { color: var(--muted); font-size: 1rem; max-width: 480px; margin: 0 auto; }
+
+    section { padding: 80px 40px; }
+    .inner { max-width: 900px; margin: 0 auto; }
+
+    /* Contact layout */
+    .contact-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 48px; align-items: start; }
+
+    /* Info side */
+    .contact-info h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 12px; }
+    .contact-info p { color: var(--muted); font-size: 0.88rem; margin-bottom: 32px; }
+
+    .info-items { display: flex; flex-direction: column; gap: 18px; }
+    .info-item { display: flex; gap: 14px; align-items: flex-start; }
+    .info-icon {
+      width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--sage-light), var(--sage));
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(122,158,126,0.3);
+    }
+    .info-text strong { display: block; font-size: 0.83rem; font-weight: 700; margin-bottom: 2px; }
+    .info-text span { font-size: 0.8rem; color: var(--muted); }
+
+    .response-note {
+      margin-top: 28px; background: var(--accent-light); border-radius: 14px; padding: 16px 18px;
+      font-size: 0.8rem; color: var(--brown);
+    }
+    .response-note strong { display: block; margin-bottom: 4px; }
+
+    /* Form side */
+    .contact-form { background: var(--white); border-radius: 24px; padding: 36px; box-shadow: 0 8px 40px rgba(0,0,0,0.08); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    .form-group label span { color: var(--accent); }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; padding: 11px 14px; border: 1.5px solid #e8e2da;
+      border-radius: 10px; font-size: 0.88rem; font-family: inherit;
+      background: var(--cream); color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--sage); box-shadow: 0 0 0 3px rgba(122,158,126,0.15);
+    }
+    .form-group textarea { resize: vertical; min-height: 130px; }
+    .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b6b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+    .submit-btn {
+      width: 100%; padding: 14px; border: none; border-radius: 30px;
+      background: var(--sage-dark); color: white;
+      font-size: 0.95rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all 0.25s;
+      box-shadow: 0 4px 20px rgba(79,122,84,0.3);
+    }
+    .submit-btn:hover { background: var(--sage); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(79,122,84,0.4); }
+
+    .form-note { font-size: 0.74rem; color: var(--muted); text-align: center; margin-top: 12px; }
+
+    /* Success state */
+    .success-msg {
+      display: none; text-align: center; padding: 28px;
+      background: rgba(122,158,126,0.1); border-radius: 16px; margin-top: 20px;
+    }
+    .success-msg .icon { font-size: 2.4rem; margin-bottom: 10px; }
+    .success-msg h3 { font-size: 1rem; font-weight: 800; color: var(--sage-dark); margin-bottom: 6px; }
+    .success-msg p { font-size: 0.83rem; color: var(--muted); }
+
+    footer { background: var(--text); color: rgba(255,255,255,0.45); text-align: center; padding: 28px 40px; font-size: 0.78rem; }
+    footer strong { color: rgba(255,255,255,0.8); }
+
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 900px) {
+      .contact-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .page-hero h1 { font-size: 1.9rem; }
+      nav ul { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">My<span>Secretary</span>AI</a>
+  <ul>
+    <li><a href="index.html">ホーム</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="pricing.html">料金</a></li>
+    <li><a href="contact.html" class="active">お問い合わせ</a></li>
+    <li><a href="#" class="nav-cta">はじめる</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero">
+  <div class="page-tag">Contact</div>
+  <h1>なんでも、<br><em>気軽に聞いてください。</em></h1>
+  <p>サービスのご質問・ご相談・フィードバック、どんな内容でもお待ちしています。</p>
+</div>
+
+<section>
+  <div class="inner">
+    <div class="contact-grid">
+
+      <div class="contact-info reveal">
+        <h2>お気軽に<br>ご連絡ください</h2>
+        <p>通常1〜2営業日以内にご返信いたします。お急ぎの場合はその旨をメッセージにご記載ください。</p>
+
+        <div class="info-items">
+          <div class="info-item">
+            <div class="info-icon">📧</div>
+            <div class="info-text">
+              <strong>メール</strong>
+              <span>hello@mysecretaryai.jp</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">🕐</div>
+            <div class="info-text">
+              <strong>対応時間</strong>
+              <span>平日 10:00 〜 18:00</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">💬</div>
+            <div class="info-text">
+              <strong>チャットサポート</strong>
+              <span>Proプラン加入者はアプリ内チャットで即対応</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="response-note">
+          <strong>✦ よくあるご相談</strong>
+          料金プランの比較・Teamプランのカスタマイズ・導入サポートのご依頼など、お気軽にどうぞ。
+        </div>
+      </div>
+
+      <div class="contact-form reveal">
+        <form id="contactForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>お名前 <span>*</span></label>
+              <input type="text" placeholder="山田 太郎" required>
+            </div>
+            <div class="form-group">
+              <label>メールアドレス <span>*</span></label>
+              <input type="email" placeholder="hello@example.com" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>お問い合わせ種別</label>
+            <select>
+              <option value="">選択してください</option>
+              <option>サービスについて</option>
+              <option>料金・プランについて</option>
+              <option>Teamプランの相談</option>
+              <option>技術的なご質問</option>
+              <option>フィードバック・ご要望</option>
+              <option>その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>メッセージ <span>*</span></label>
+            <textarea placeholder="ご質問・ご相談内容をご記入ください。" required></textarea>
+          </div>
+          <button type="submit" class="submit-btn">✦ 送信する</button>
+          <p class="form-note">送信後、確認メールが届きます。迷惑メールフォルダもご確認ください。</p>
+        </form>
+
+        <div class="success-msg" id="successMsg">
+          <div class="icon">🌿</div>
+          <h3>送信が完了しました！</h3>
+          <p>ありがとうございます。1〜2営業日以内にご返信いたします。</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>MySecretaryAI</strong> — 5つの顔を、ひとつにまとめる。</p>
+  <p style="margin-top:8px">© 2026 MySecretaryAI · すべての業務に、ゆとりを。</p>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 70); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => obs.observe(el));
+
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    this.style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
+  });
+</script>
+</body>
+</html>

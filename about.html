@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — MySecretaryAI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --sage: #7a9e7e; --sage-light: #a8c5ac; --sage-dark: #4f7a54;
+      --cream: #faf7f2; --warm: #f5efe6; --brown: #8b6f5e;
+      --text: #2d2d2d; --muted: #6b6b6b; --accent: #d4956a;
+      --accent-light: #f0d5c0; --white: #ffffff;
+    }
+    body { font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; }
+
+    nav {
+      position: fixed; top: 0; width: 100%;
+      background: rgba(250,247,242,0.93); backdrop-filter: blur(14px);
+      padding: 14px 40px; display: flex; justify-content: space-between; align-items: center;
+      z-index: 100; border-bottom: 1px solid rgba(122,158,126,0.15);
+    }
+    .logo { font-size: 1.1rem; font-weight: 800; color: var(--sage-dark); letter-spacing: 0.04em; }
+    .logo span { color: var(--accent); }
+    nav ul { display: flex; list-style: none; gap: 28px; }
+    nav ul a { text-decoration: none; color: var(--muted); font-size: 0.85rem; transition: color 0.2s; }
+    nav ul a:hover, nav ul a.active { color: var(--sage-dark); font-weight: 700; }
+    .nav-cta { background: var(--sage-dark); color: var(--white) !important; padding: 7px 18px; border-radius: 22px; font-weight: 700 !important; }
+
+    .page-hero {
+      padding: 140px 40px 80px;
+      background: linear-gradient(135deg, var(--warm) 0%, var(--cream) 100%);
+      text-align: center;
+    }
+    .page-tag { display: inline-block; font-size: 0.73rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+    .page-hero h1 { font-size: 2.6rem; font-weight: 900; margin-bottom: 18px; }
+    .page-hero h1 em { font-style: normal; color: var(--sage-dark); }
+    .page-hero p { color: var(--muted); font-size: 1rem; max-width: 520px; margin: 0 auto; }
+
+    section { padding: 80px 40px; }
+    .inner { max-width: 1000px; margin: 0 auto; }
+
+    .section-tag { display: inline-block; font-size: 0.73rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+    .section-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 14px; }
+    .section-desc { color: var(--muted); font-size: 0.95rem; margin-bottom: 40px; }
+
+    /* Story */
+    .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+    .story-img {
+      background: linear-gradient(135deg, var(--sage-light), var(--sage-dark));
+      border-radius: 24px; aspect-ratio: 1; display: flex; align-items: center;
+      justify-content: center; font-size: 5rem;
+    }
+    .story-text p { color: var(--muted); margin-bottom: 18px; font-size: 0.95rem; }
+
+    /* Values */
+    .values-section { background: var(--warm); }
+    .values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .value-card { background: var(--white); border-radius: 20px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+    .value-icon { font-size: 2rem; margin-bottom: 14px; }
+    .value-card h3 { font-size: 1rem; font-weight: 800; margin-bottom: 8px; color: var(--sage-dark); }
+    .value-card p { font-size: 0.83rem; color: var(--muted); }
+
+    /* Team */
+    .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .team-card { background: var(--white); border-radius: 20px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; }
+    .team-avatar { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: var(--warm); }
+    .team-card h3 { font-size: 0.97rem; font-weight: 800; margin-bottom: 4px; }
+    .team-card .role { font-size: 0.78rem; color: var(--accent); font-weight: 700; margin-bottom: 10px; }
+    .team-card p { font-size: 0.8rem; color: var(--muted); }
+
+    /* CTA */
+    .cta-section { background: linear-gradient(135deg, var(--sage-dark) 0%, #3d6644 100%); color: var(--white); text-align: center; padding: 96px 40px; }
+    .cta-section h2 { font-size: 2rem; font-weight: 900; margin-bottom: 14px; }
+    .cta-desc { color: rgba(255,255,255,0.75); font-size: 1rem; max-width: 440px; margin: 0 auto 32px; }
+    .btn-light { background: var(--white); color: var(--sage-dark); padding: 13px 34px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 0.93rem; transition: all 0.25s; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    .btn-light:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.22); }
+
+    footer { background: var(--text); color: rgba(255,255,255,0.45); text-align: center; padding: 28px 40px; font-size: 0.78rem; }
+    footer strong { color: rgba(255,255,255,0.8); }
+
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 900px) {
+      .story-grid, .values-grid, .team-grid { grid-template-columns: 1fr; }
+      .page-hero h1 { font-size: 1.9rem; }
+      nav ul { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">My<span>Secretary</span>AI</a>
+  <ul>
+    <li><a href="index.html">ホーム</a></li>
+    <li><a href="about.html" class="active">About</a></li>
+    <li><a href="pricing.html">料金</a></li>
+    <li><a href="contact.html">お問い合わせ</a></li>
+    <li><a href="#" class="nav-cta">はじめる</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero">
+  <div class="page-tag">About Us</div>
+  <h1>「忙しい」を、<br><em>仕組みで解決する。</em></h1>
+  <p>MySecretaryAIは、複数の役割を持つ人が「今日何をすればいいか」を迷わず動ける世界をつくるために生まれました。</p>
+</div>
+
+<!-- STORY -->
+<section>
+  <div class="inner">
+    <div class="story-grid">
+      <div class="story-img reveal">🤖</div>
+      <div class="story-text reveal">
+        <div class="section-tag">Story</div>
+        <h2 class="section-title">なぜ、このサービスを<br>つくったのか。</h2>
+        <p>「全部大事なのに、全部が後手に回る」——そんな声からMySecretaryAIは生まれました。</p>
+        <p>ヨガ講師、学生、親、副業……現代の多くの人が複数の役割を同時にこなしています。しかしツールはバラバラで、優先順位は感覚頼み。</p>
+        <p>AIが秘書として全業務を一元管理し、「今日これをやれば大丈夫」と教えてくれる仕組みをつくりました。休日は守られ、大事なことは前進する。そんな毎日を届けたいと思っています。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="values-section">
+  <div class="inner">
+    <div class="reveal">
+      <div class="section-tag">Values</div>
+      <h2 class="section-title">私たちが大切にすること</h2>
+      <p class="section-desc">3つの価値観がMySecretaryAIのすべてを動かしています。</p>
+    </div>
+    <div class="values-grid">
+      <div class="value-card reveal">
+        <div class="value-icon">🌿</div>
+        <h3>休息を守る設計</h3>
+        <p>オフを先に確保する。休日を「余った時間」ではなく「必ず守る枠」として設計の出発点にします。</p>
+      </div>
+      <div class="value-card reveal">
+        <div class="value-icon">✦</div>
+        <h3>大事なことを前進させる</h3>
+        <p>緊急ではないが重要なこと——IKIGAIや夢——が毎週少しずつ進む仕組みをつくります。</p>
+      </div>
+      <div class="value-card reveal">
+        <div class="value-icon">📋</div>
+        <h3>シンプルに、一か所に</h3>
+        <p>ツールを増やさない。全業務・SNS・スケジュールを一つに集約し、考える量を減らします。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section>
+  <div class="inner">
+    <div class="reveal">
+      <div class="section-tag">Team</div>
+      <h2 class="section-title">チームメンバー</h2>
+      <p class="section-desc">多様な役割を持つ人たちが、同じ課題を解決するために集まっています。</p>
+    </div>
+    <div class="team-grid">
+      <div class="team-card reveal">
+        <div class="team-avatar">🧘</div>
+        <h3>Rei</h3>
+        <div class="role">Founder / ヨガ講師</div>
+        <p>5つの役割を持つ当事者として、このツールの最初のユーザー。「自分が欲しいものをつくる」精神で開発をリード。</p>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-avatar">⚙️</div>
+        <h3>AI Secretary</h3>
+        <div class="role">Chief of Staff</div>
+        <p>全業務の一元管理・優先順位判断・スケジュール自動再配分を担当。24時間365日稼働中。</p>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-avatar">🌱</div>
+        <h3>You</h3>
+        <div class="role">次のメンバー</div>
+        <p>MySecretaryAIは、使う人とともに育ちます。あなたのフィードバックが次のアップデートをつくります。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="reveal">
+    <h2>一緒に、ゆとりある毎日を。</h2>
+    <p class="cta-desc">まず今週の全タスクを書き出すだけ。AIが整理して、あなたの秘書になります。</p>
+    <a href="index.html#cta" class="btn-light">✦ 今すぐはじめる（無料）</a>
+  </div>
+</section>
+
+<footer>
+  <p><strong>MySecretaryAI</strong> — 5つの顔を、ひとつにまとめる。</p>
+  <p style="margin-top:8px">© 2026 MySecretaryAI · すべての業務に、ゆとりを。</p>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 70); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
