@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大学生 — My Super Secretary</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --sage: #7a9e7e; --sage-light: #a8c5ac; --sage-dark: #4f7a54;
+      --cream: #faf7f2; --warm: #f5efe6;
+      --text: #2d2d2d; --muted: #6b6b6b; --accent: #d4956a;
+      --white: #ffffff; --red: #e05555;
+      --univ: #c47a3e; --univ-bg: rgba(212,149,106,0.15);
+    }
+    body { font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+    nav { position: fixed; top: 0; width: 100%; background: rgba(250,247,242,0.96); backdrop-filter: blur(14px); padding: 12px 32px; display: flex; justify-content: space-between; align-items: center; z-index: 100; border-bottom: 1px solid rgba(122,158,126,0.18); }
+    .logo { font-size: 1rem; font-weight: 800; color: var(--sage-dark); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    .nav-links { display: flex; list-style: none; gap: 4px; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.82rem; padding: 6px 14px; border-radius: 20px; transition: all 0.2s; font-weight: 500; }
+    .nav-links a:hover { background: var(--warm); color: var(--sage-dark); }
+    .nav-links a.active { background: var(--sage-dark); color: white; }
+
+    .page { padding: 88px 32px 60px; max-width: 1060px; margin: 0 auto; }
+
+    .page-header { margin-bottom: 24px; }
+    .role-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--univ-bg); color: var(--univ); font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 14px; margin-bottom: 8px; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 900; margin-bottom: 4px; }
+    .page-header p { font-size: 0.83rem; color: var(--muted); }
+
+    /* Inner tabs */
+    .inner-tabs { display: flex; gap: 6px; margin-bottom: 22px; background: var(--white); border-radius: 14px; padding: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); width: fit-content; }
+    .inner-tab { background: none; border: none; padding: 8px 18px; border-radius: 10px; font-size: 0.84rem; font-weight: 700; cursor: pointer; color: var(--muted); font-family: inherit; transition: all 0.2s; }
+    .inner-tab.active { background: var(--univ); color: white; }
+    .inner-tab:hover:not(.active) { background: var(--warm); color: var(--univ); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    /* Cards */
+    .card { background: var(--white); border-radius: 18px; padding: 22px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); margin-bottom: 16px; }
+    .card-title { font-size: 0.71rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+
+    /* Forms */
+    .form-group { margin-bottom: 13px; }
+    .form-group label { display: block; font-size: 0.76rem; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 9px 12px; border: 1.5px solid #e8e2da;
+      border-radius: 10px; font-size: 0.86rem; font-family: inherit;
+      background: var(--cream); color: var(--text); outline: none; transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--univ); }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .btn-primary { width: 100%; background: var(--univ); color: white; border: none; border-radius: 12px; padding: 11px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; margin-top: 4px; }
+    .btn-primary:hover { background: #b06a2e; }
+
+    /* Task preview */
+    .task-preview { background: var(--univ-bg); border-radius: 12px; padding: 14px; margin-top: 14px; }
+    .task-preview-title { font-size: 0.72rem; font-weight: 700; color: var(--univ); margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .task-preview-item { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; font-size: 0.8rem; border-bottom: 1px solid rgba(212,149,106,0.2); }
+    .task-preview-item:last-child { border-bottom: none; }
+    .task-preview-date { font-size: 0.72rem; color: var(--univ); font-weight: 700; width: 72px; flex-shrink: 0; padding-top: 1px; }
+    .task-preview-name { flex: 1; }
+
+    /* Exam cards */
+    .exam-card { background: var(--white); border-radius: 16px; padding: 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 12px; border-left: 4px solid var(--univ); }
+    .exam-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .exam-subject { font-size: 1rem; font-weight: 800; }
+    .exam-date-badge { background: var(--univ-bg); color: var(--univ); font-size: 0.78rem; font-weight: 700; padding: 4px 10px; border-radius: 10px; }
+    .exam-countdown { font-size: 0.82rem; color: var(--muted); margin-bottom: 8px; }
+    .exam-countdown strong { color: var(--univ); font-size: 1rem; }
+    .exam-countdown.soon strong { color: var(--red); }
+    .exam-tasks-toggle { font-size: 0.76rem; color: var(--univ); font-weight: 700; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; }
+    .exam-task-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .exam-task-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; padding: 6px 10px; background: var(--warm); border-radius: 8px; }
+    .exam-task-item input[type=checkbox] { accent-color: var(--univ); flex-shrink: 0; }
+    .exam-task-name { flex: 1; }
+    .exam-task-name.done { text-decoration: line-through; opacity: 0.45; }
+    .exam-task-due { font-size: 0.7rem; color: var(--muted); flex-shrink: 0; }
+    .exam-del { background: none; border: none; cursor: pointer; color: #ccc; font-size: 0.85rem; transition: color 0.15s; margin-left: auto; }
+    .exam-del:hover { color: var(--red); }
+
+    /* Assignment list */
+    .assign-item { display: flex; align-items: flex-start; gap: 12px; padding: 13px 16px; background: var(--white); border-radius: 14px; box-shadow: 0 1px 10px rgba(0,0,0,0.05); margin-bottom: 8px; }
+    .assign-item.done-card { opacity: 0.45; }
+    .assign-cb { width: 17px; height: 17px; margin-top: 2px; accent-color: var(--univ); flex-shrink: 0; cursor: pointer; }
+    .assign-body { flex: 1; min-width: 0; }
+    .assign-title { font-size: 0.9rem; font-weight: 600; }
+    .assign-title.done { text-decoration: line-through; }
+    .assign-meta { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; align-items: center; }
+    .assign-subject { font-size: 0.72rem; background: var(--univ-bg); color: var(--univ); padding: 2px 8px; border-radius: 8px; font-weight: 700; }
+    .assign-due { font-size: 0.72rem; color: var(--muted); }
+    .assign-due.overdue { color: var(--red); font-weight: 700; }
+    .prio-chip { font-size: 0.68rem; padding: 2px 7px; border-radius: 8px; font-weight: 700; }
+    .prio-high { background: #fde8e8; color: #c0392b; }
+    .prio-mid  { background: #fef3e0; color: var(--univ); }
+    .prio-low  { background: #eaf3ea; color: #4f7a54; }
+    .del-btn { background: none; border: none; cursor: pointer; color: #ccc; font-size: 0.9rem; flex-shrink: 0; transition: color 0.15s; }
+    .del-btn:hover { color: var(--red); }
+
+    .empty-state { text-align: center; padding: 28px 0; color: var(--muted); font-size: 0.82rem; }
+
+    @media (max-width: 800px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .page { padding: 80px 16px 40px; }
+      nav { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">My<span>Super</span>Secretary</a>
+  <ul class="nav-links">
+    <li><a href="index.html">ホーム</a></li>
+    <li><a href="schedule.html">スケジュール</a></li>
+    <li><a href="tasks.html">タスク</a></li>
+    <li><a href="yoga.html">🧘 ヨガ</a></li>
+    <li><a href="university.html" class="active">📚 大学</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="role-tag">📚 大学生</div>
+    <h1>試験・課題管理</h1>
+    <p>試験日を登録すると、2週間前〜前日まで逆算した勉強タスクを自動で作成します。</p>
+  </div>
+
+  <div class="inner-tabs">
+    <button class="inner-tab active" onclick="showTab(this,'exams')">📝 試験管理</button>
+    <button class="inner-tab" onclick="showTab(this,'assignments')">📋 課題管理</button>
+  </div>
+
+  <!-- ===== EXAMS ===== -->
+  <div id="panel-exams" class="tab-panel active">
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <div class="card-title">試験を登録</div>
+          <div class="form-group">
+            <label>科目名</label>
+            <input type="text" id="eSubject" placeholder="例：統計学、英語、心理学">
+          </div>
+          <div class="form-group">
+            <label>試験日</label>
+            <input type="date" id="eDate">
+          </div>
+          <div class="form-group">
+            <label>メモ（試験範囲など）</label>
+            <input type="text" id="eNotes" placeholder="例：第1〜8章、持ち込み不可">
+          </div>
+          <div id="examPreview" class="task-preview" style="display:none">
+            <div class="task-preview-title">✦ 自動生成される勉強タスク</div>
+            <div id="examPreviewItems"></div>
+          </div>
+          <button class="btn-primary" onclick="addExam()" style="margin-top:14px">登録して勉強タスクを自動生成</button>
+        </div>
+      </div>
+      <div>
+        <div class="card-title" style="padding-left:4px">登録済み試験</div>
+        <div id="examList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ASSIGNMENTS ===== -->
+  <div id="panel-assignments" class="tab-panel">
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <div class="card-title">課題を追加</div>
+          <div class="form-group">
+            <label>科目名</label>
+            <input type="text" id="aSubject" placeholder="例：統計学">
+          </div>
+          <div class="form-group">
+            <label>課題タイトル</label>
+            <input type="text" id="aTitle" placeholder="例：レポート第2回" onkeydown="if(event.key==='Enter')addAssignment()">
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>締切日</label>
+              <input type="date" id="aDue">
+            </div>
+            <div class="form-group">
+              <label>優先度</label>
+              <select id="aPrio">
+                <option value="high">🔴 高</option>
+                <option value="medium" selected>🟡 中</option>
+                <option value="low">🟢 低</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="addAssignment()">追加</button>
+        </div>
+      </div>
+      <div>
+        <div class="card-title" style="padding-left:4px">課題一覧</div>
+        <div id="assignList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const today = new Date();
+const todayStr = today.toISOString().slice(0,10);
+
+function fmt(d) { return d.toISOString().slice(0,10); }
+function uid() { return Math.random().toString(36).slice(2,10); }
+function addDays(dateStr, n) { const d = new Date(dateStr); d.setDate(d.getDate()+n); return fmt(d); }
+function diffDays(dateStr) { return Math.ceil((new Date(dateStr) - new Date(todayStr)) / 86400000); }
+
+const getExams      = () => JSON.parse(localStorage.getItem('msa_univ_exams') || '[]');
+const saveExams     = d  => localStorage.setItem('msa_univ_exams', JSON.stringify(d));
+const getAssignments= () => JSON.parse(localStorage.getItem('msa_univ_assign') || '[]');
+const saveAssignments=d  => localStorage.setItem('msa_univ_assign', JSON.stringify(d));
+const getTasks      = () => JSON.parse(localStorage.getItem('msa_tasks') || '[]');
+const saveTasks     = d  => localStorage.setItem('msa_tasks', JSON.stringify(d));
+
+const STUDY_STEPS = [
+  { days: -14, label: '14日前', title: (s) => `【${s}】試験範囲を確認・勉強計画を立てる`, priority: 'high' },
+  { days:  -7, label:  '7日前', title: (s) => `【${s}】集中的に勉強する`,                  priority: 'high' },
+  { days:  -3, label:  '3日前', title: (s) => `【${s}】苦手箇所を最終確認する`,            priority: 'high' },
+  { days:  -1, label:  '前日',  title: (s) => `【${s}】最終復習・持ち物準備（学生証等）`,  priority: 'high' },
+];
+
+function buildExamTasks(exam) {
+  return STUDY_STEPS.map(s => ({
+    id: uid(),
+    role: 'univ',
+    title: s.title(exam.subject),
+    dueDate: addDays(exam.examDate, s.days),
+    priority: s.priority,
+    completed: false,
+    createdAt: new Date().toISOString(),
+    sourceId: exam.id,
+  }));
+}
+
+// Preview
+function updateExamPreview() {
+  const subject = document.getElementById('eSubject').value.trim() || '〇〇';
+  const date = document.getElementById('eDate').value;
+  const previewEl = document.getElementById('examPreview');
+  if (!date) { previewEl.style.display = 'none'; return; }
+  previewEl.style.display = 'block';
+
+  const dummy = { id:'x', subject, examDate: date };
+  const tasks = buildExamTasks(dummy);
+  document.getElementById('examPreviewItems').innerHTML = tasks.map(t => `
+    <div class="task-preview-item">
+      <div class="task-preview-date">${t.dueDate}</div>
+      <div class="task-preview-name">${t.title}</div>
+    </div>`).join('');
+}
+
+['eSubject','eDate'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateExamPreview);
+});
+
+document.getElementById('eDate').value = todayStr;
+document.getElementById('aDue').value = todayStr;
+
+function addExam() {
+  const subject = document.getElementById('eSubject').value.trim();
+  const examDate = document.getElementById('eDate').value;
+  if (!subject) { alert('科目名を入力してください'); return; }
+  if (!examDate) { alert('試験日を入力してください'); return; }
+
+  const exam = { id: uid(), subject, examDate, notes: document.getElementById('eNotes').value.trim() };
+  const exams = getExams(); exams.push(exam); saveExams(exams);
+
+  const newTasks = buildExamTasks(exam);
+  saveTasks([...getTasks(), ...newTasks]);
+
+  document.getElementById('eSubject').value = '';
+  document.getElementById('eNotes').value = '';
+  document.getElementById('examPreview').style.display = 'none';
+
+  renderExams();
+  alert(`✓ 試験を登録しました。${newTasks.length}件の勉強タスクを自動生成しました。`);
+}
+
+function deleteExam(id) {
+  if (!confirm('この試験を削除しますか？（生成済みタスクはタスク画面で個別に削除してください）')) return;
+  saveExams(getExams().filter(e => e.id !== id));
+  renderExams();
+}
+
+// Toggle individual exam task from exam view
+function toggleExamTask(taskId) {
+  const tasks = getTasks();
+  const t = tasks.find(x => x.id === taskId);
+  if (t) { t.completed = !t.completed; saveTasks(tasks); renderExams(); }
+}
+
+function renderExams() {
+  const el = document.getElementById('examList');
+  const exams = getExams().sort((a,b) => a.examDate.localeCompare(b.examDate));
+  if (!exams.length) { el.innerHTML = `<div class="empty-state">試験が登録されていません</div>`; return; }
+
+  const allTasks = getTasks();
+
+  el.innerHTML = exams.map(exam => {
+    const diff = diffDays(exam.examDate);
+    const soon = diff <= 7;
+    const past = diff < 0;
+    const relatedTasks = allTasks.filter(t => t.sourceId === exam.id);
+    const pendingCount = relatedTasks.filter(t => !t.completed).length;
+
+    return `<div class="exam-card">
+      <div class="exam-header">
+        <div class="exam-subject">📝 ${exam.subject}</div>
+        <div class="exam-date-badge">${exam.examDate}</div>
+      </div>
+      <div class="exam-countdown${soon && !past ? ' soon' : ''}">
+        ${past
+          ? `<span style="color:var(--muted)">試験終了</span>`
+          : `試験まで <strong>${diff}日</strong>`}
+        　未完了タスク: <strong style="color:var(--univ)">${pendingCount}件</strong>
+      </div>
+      ${exam.notes ? `<div style="font-size:0.76rem;color:var(--muted);margin-bottom:8px">📎 ${exam.notes}</div>` : ''}
+      ${relatedTasks.length ? `
+        <div class="exam-task-list">
+          ${relatedTasks.sort((a,b)=>a.dueDate.localeCompare(b.dueDate)).map(t => `
+            <div class="exam-task-item">
+              <input type="checkbox" ${t.completed?'checked':''} onchange="toggleExamTask('${t.id}')">
+              <span class="exam-task-name${t.completed?' done':''}">${t.title}</span>
+              <span class="exam-task-due">${t.dueDate}</span>
+            </div>`).join('')}
+        </div>` : ''}
+      <div style="margin-top:10px;text-align:right">
+        <button class="exam-del" onclick="deleteExam('${exam.id}')">✕ 削除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Assignments
+function addAssignment() {
+  const title = document.getElementById('aTitle').value.trim();
+  if (!title) { document.getElementById('aTitle').focus(); return; }
+  const assign = {
+    id: uid(),
+    subject: document.getElementById('aSubject').value.trim(),
+    title,
+    dueDate: document.getElementById('aDue').value,
+    priority: document.getElementById('aPrio').value,
+    completed: false,
+    createdAt: new Date().toISOString(),
+  };
+  // Also add to shared tasks
+  const task = { id: uid(), role: 'univ', title: `【課題】${assign.subject ? assign.subject+'：' : ''}${title}`, dueDate: assign.dueDate, priority: assign.priority, completed: false, createdAt: assign.createdAt };
+  saveAssignments([...getAssignments(), assign]);
+  saveTasks([...getTasks(), task]);
+  document.getElementById('aTitle').value = '';
+  document.getElementById('aTitle').focus();
+  renderAssignments();
+}
+
+function toggleAssignment(id) {
+  const list = getAssignments();
+  const item = list.find(a=>a.id===id);
+  if (item) { item.completed = !item.completed; saveAssignments(list); renderAssignments(); }
+}
+
+function deleteAssignment(id) {
+  if (!confirm('この課題を削除しますか？')) return;
+  saveAssignments(getAssignments().filter(a=>a.id!==id));
+  renderAssignments();
+}
+
+function renderAssignments() {
+  const el = document.getElementById('assignList');
+  const list = getAssignments().sort((a,b) => {
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    return a.dueDate.localeCompare(b.dueDate);
+  });
+  if (!list.length) { el.innerHTML = `<div class="empty-state">課題がありません</div>`; return; }
+
+  const prioMap = { high:['高','prio-high'], medium:['中','prio-mid'], low:['低','prio-low'] };
+  el.innerHTML = list.map(a => {
+    const overdue = !a.completed && a.dueDate < todayStr;
+    const [pl, pc] = prioMap[a.priority] || ['中','prio-mid'];
+    return `<div class="assign-item${a.completed?' done-card':''}">
+      <input type="checkbox" class="assign-cb" ${a.completed?'checked':''} onchange="toggleAssignment('${a.id}')">
+      <div class="assign-body">
+        <div class="assign-title${a.completed?' done':''}">${a.title}</div>
+        <div class="assign-meta">
+          ${a.subject ? `<span class="assign-subject">${a.subject}</span>` : ''}
+          <span class="assign-due${overdue?' overdue':''}">${overdue?'⚠ ':' '}${a.dueDate}</span>
+          <span class="prio-chip ${pc}">${pl}</span>
+        </div>
+      </div>
+      <button class="del-btn" onclick="deleteAssignment('${a.id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function showTab(btn, name) {
+  document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.inner-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+renderExams();
+renderAssignments();
+updateExamPreview();
+</script>
+</body>
+</html>
